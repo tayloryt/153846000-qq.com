@@ -40,6 +40,9 @@ class MyPromise {
     this.onfulfilledList = [];
     this.rejectedList = [];
     this.resolve = value => {
+        if(value instanceof MyPromise){
+            return value.then(this.resolve,this.reject)
+        }
       if (this.status === PENDDING) {
         this.status = ONFULFILLED;
         this.value = value;
@@ -104,7 +107,7 @@ class MyPromise {
     });
     return promise2;
   }
-  catch(e){
-      this.then(null,reject(e))
+  catch(callback){
+      return this.then(null,callback)
   }
 }
