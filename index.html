@@ -11,15 +11,18 @@
         const promise = new MyPromise((res,rej)=>{
             res(2)
         })
-        promise.then(res=>{
-            return promise
-        },(rej)=>{
-            console.log(rej)
-        }).then(res=>{
-            console.log(res)
-        },res=>{
-            console.log(res)
-        })
+      let promise2 =  promise.then(res=>{
+          return new MyPromise((res,rej)=>{
+              res(new MyPromise((resolve,reject)=>{
+                  reject(213)
+              }))
+          })
+      })
+      promise2.then().then().then().then(res=>{
+          console.log(res)
+      }).catch(e){
+          console.log(e)
+      }
     </script>
 </body>
 </html>
