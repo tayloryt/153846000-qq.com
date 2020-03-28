@@ -1,15 +1,24 @@
 const ONFULFILLED = "ONFULFILLED";
 const REJECTED = "REJECTED";
 const PENDDING = "PENDDING";
-function isPromise(data) {
+function isObjFn(data) {
   return (
     (typeof data === "object" && data !== null) || typeof data === "function"
   );
 }
+function isPromise(data) {
+  if (
+    (typeof data === "object" && data !== null) ||
+    typeof data === "function"
+  ) {
+    return typeof data.then === "function";
+  }
+  return false;
+}
 function resolvePromise(promise, x, resolve, reject) {
   if (promise === x) {
     reject(new TypeError("Chaining cycle detected for promise #<Promise>"));
-  } else if (isPromise(x)) {
+  } else if (isObjFn(x)) {
     try {
       let then = x.then;
       if (typeof then === "function") {
@@ -40,9 +49,9 @@ class MyPromise {
     this.onfulfilledList = [];
     this.rejectedList = [];
     this.resolve = value => {
-        if(value instanceof MyPromise){
-            return value.then(this.resolve,this.reject)
-        }
+      if (value instanceof MyPromise) {
+        return value.then(this.resolve, this.reject);
+      }
       if (this.status === PENDDING) {
         this.status = ONFULFILLED;
         this.value = value;
@@ -107,7 +116,65 @@ class MyPromise {
     });
     return promise2;
   }
-  catch(callback){
-      return this.then(null,callback)
+  catch(callback) {
+    return this.then(null, callback);
+  }
+  static resolve(val) {
+    return new MyPromise((res, rej) => {
+      res(val);
+    });
+  }
+  static reject(val) {
+    return new MyPromise((res, rej) => {
+      rej(val);
+    });
+  }
+  static all(promises) {
+    if (Object.prototype.toString.call(promises) !== "[object Array]")
+      throw new TypeError("options must be array");
+    return new MyPromise((resolve, reject) => {
+      let arr = [];
+      let i = 0;
+      let processData = (index, data) => {
+        arr[index] = data;
+        if (++i === promises.length) {
+          resolve(arr);
+        }
+      };
+      for (let i = 0; i < promises.length; i++) {
+        if (isPromise(promises[i])) {
+          promises[i].then(data => {
+            processData(i, data);
+          }, reject);
+        } else {
+          processData(i, promises[i]);
+        }
+      }
+    });
+  }
+  static race(promises) {
+    return new MyPromise((resolve, reject) => {
+      for (let i = 0; i < promises.length; i++) {
+        if (isPromise(promises[i])) {
+          promises[i].then(resolve, reject);
+        } else {
+          resolve(promises[i]);
+        }
+      }
+    });
+  }
+  finally(fn) {
+    return this.then(
+      data => {
+       return MyPromise.resolve(fn()).then(() => {
+          return data;
+        });
+      },
+      err => {
+       return MyPromise.resolve(fn()).then(() => {
+          throw err;
+        });
+      }
+    );
   }
 }
