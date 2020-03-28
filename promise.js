@@ -158,7 +158,7 @@ class MyPromise {
         if (isPromise(promises[i])) {
           promises[i].then(resolve, reject);
         } else {
-          resolve(promises[i]);
+          resolve(MyPromise.resolve(promises[i]));
         }
       }
     });

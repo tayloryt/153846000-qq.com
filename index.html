@@ -26,34 +26,31 @@
       //       console.log(res)
       //   })
 
-    //   let a1 = new MyPromise((res, rej) => {
-    //     res(123);
-    //   });
-    //   function bb() {
-    //     throw new Error("bb");
-    //   }
-    //   MyPromise.race([a1, 2, 3]).then(
-    //     res => {
-    //       console.log(res);
-    //     },
-    //     rej => {
-    //       console.log(rej);
-    //     }
-    //   );
-    let promise = new MyPromise((res,rej)=>{
-        res(new MyPromise((resolve,reject)=>{
-            resolve(1234)
-        }))
-    })
-    promise.finally(()=>{
-       return new MyPromise((res)=>{
-            setTimeout(()=>{
-           res(123)
-        },1000)
-        })
-    }).then(res=>{
-        console.log(res)
-    })
+      let a1 = new MyPromise((res, rej) => {
+        res(123);
+      });
+      MyPromise.race([2, 3, a1]).then(
+        res => {
+          console.log(res);
+        },
+        rej => {
+          console.log(rej);
+        }
+      );
+      // let promise = new MyPromise((res,rej)=>{
+      //     res(new MyPromise((resolve,reject)=>{
+      //         resolve(1234)
+      //     }))
+      // })
+      // promise.finally(()=>{
+      //    return new MyPromise((res)=>{
+      //         setTimeout(()=>{
+      //        res(123)
+      //     },1000)
+      //     })
+      // }).then(res=>{
+      //     console.log(res)
+      // })
     </script>
   </body>
 </html>
